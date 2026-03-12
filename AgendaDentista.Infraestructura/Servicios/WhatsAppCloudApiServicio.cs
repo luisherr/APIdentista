@@ -60,14 +60,20 @@ public class WhatsAppCloudApiServicio : IWhatsAppServicio
             var response = await _httpClient.PostAsJsonAsync(url, payload);
 
             string? idMensajeProveedor = null;
+            var responseBody = await response.Content.ReadAsStringAsync();
+
             if (response.IsSuccessStatusCode)
             {
-                var responseBody = await response.Content.ReadAsStringAsync();
                 using var doc = JsonDocument.Parse(responseBody);
                 idMensajeProveedor = doc.RootElement
                     .GetProperty("messages")[0]
                     .GetProperty("id")
                     .GetString();
+            }
+            else
+            {
+                _logger.LogError("Meta API error {StatusCode}: {ResponseBody}",
+                    (int)response.StatusCode, responseBody);
             }
 
             var mensajeRegistro = new MensajeWhatsApp
