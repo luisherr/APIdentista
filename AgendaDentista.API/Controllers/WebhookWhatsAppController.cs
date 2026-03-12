@@ -41,19 +41,16 @@ public class WebhookWhatsAppController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult RecibirMensaje([FromBody] MensajeEntranteWhatsAppDto mensaje)
+    public async Task<IActionResult> RecibirMensaje([FromBody] MensajeEntranteWhatsAppDto mensaje)
     {
-        _ = Task.Run(async () =>
+        try
         {
-            try
-            {
-                await _whatsAppServicio.ProcesarMensajeEntranteAsync(mensaje);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error procesando mensaje entrante de WhatsApp");
-            }
-        });
+            await _whatsAppServicio.ProcesarMensajeEntranteAsync(mensaje);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error procesando mensaje entrante de WhatsApp");
+        }
 
         return Ok();
     }
