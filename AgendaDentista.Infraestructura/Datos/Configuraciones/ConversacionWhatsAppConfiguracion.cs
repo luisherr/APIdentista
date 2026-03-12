@@ -21,11 +21,11 @@ public class ConversacionWhatsAppConfiguracion : IEntityTypeConfiguration<Conver
         builder.HasOne(c => c.Paciente)
             .WithMany()
             .HasForeignKey(c => c.IdPaciente)
-            .OnDelete(DeleteBehavior.SetNull);
+            .OnDelete(DeleteBehavior.NoAction);
 
         builder.HasOne(c => c.Dentista)
             .WithMany()
             .HasForeignKey(c => c.IdDentista)
-            .OnDelete(DeleteBehavior.SetNull);
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }
