@@ -1,0 +1,6 @@
+@AgendaDentista.API_HostAddress = http://localhost:5211
+
+GET {{AgendaDentista.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

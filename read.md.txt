@@ -1,0 +1,384 @@
+# Especificación del Proyecto
+
+Sistema de Recordatorios de Citas Dentales por WhatsApp
+
+## Objetivo del proyecto
+
+Desarrollar un sistema backend en **.NET** que permita automatizar el envío de recordatorios de citas dentales a pacientes mediante **WhatsApp**.
+
+El sistema permitirá:
+
+* Registrar pacientes
+* Registrar citas dentales
+* Detectar citas próximas
+* Enviar recordatorios automáticos
+* Permitir confirmación o cancelación de citas mediante WhatsApp
+* Registrar historial de mensajes y recordatorios
+
+Este sistema será inicialmente **solo backend**, sin interfaz web.
+
+En una segunda fase se desarrollará una **aplicación web para el dentista** que consumirá esta API.
+
+---
+
+# Arquitectura del sistema
+
+El sistema seguirá **Clean Architecture** con separación clara de responsabilidades.
+
+Capas principales:
+
+* Dominio
+* Aplicación
+* Infraestructura
+* API
+* Worker de Recordatorios
+
+Principios:
+
+* Desacoplamiento
+* Inyección de dependencias
+* Separación de responsabilidades
+* Código testeable
+* Preparado para escalabilidad
+
+---
+
+# Estructura de la solución .NET
+
+La solución se llamará:
+
+AgendaDentista
+
+Contendrá los siguientes proyectos:
+
+AgendaDentista.API
+AgendaDentista.Aplicacion
+AgendaDentista.Dominio
+AgendaDentista.Infraestructura
+AgendaDentista.WorkerRecordatorios
+
+---
+
+# Responsabilidad de cada proyecto
+
+## AgendaDentista.Dominio
+
+Contiene:
+
+* Entidades del dominio
+* Enums
+* Interfaces de repositorios
+* Reglas de negocio
+
+Ejemplos de entidades:
+
+Dentista
+Paciente
+Cita
+Recordatorio
+MensajeWhatsApp
+
+---
+
+## AgendaDentista.Aplicacion
+
+Contiene:
+
+* Casos de uso
+* DTOs
+* Interfaces de servicios
+* Lógica de aplicación
+
+Ejemplos de servicios:
+
+CitaServicio
+PacienteServicio
+RecordatorioServicio
+WhatsAppServicio
+
+Ejemplos de casos de uso:
+
+CrearCita
+ConfirmarCita
+CancelarCita
+ObtenerAgenda
+EnviarRecordatorio
+
+---
+
+## AgendaDentista.Infraestructura
+
+Contiene:
+
+* Implementación de repositorios
+* Entity Framework Core
+* Integración con WhatsApp API
+* Configuración de base de datos
+
+Componentes:
+
+AgendaDbContext
+CitaRepositorio
+PacienteRepositorio
+WhatsAppService
+
+---
+
+## AgendaDentista.API
+
+Proyecto ASP.NET Web API.
+
+Responsable de exponer endpoints REST.
+
+Ejemplos de controladores:
+
+CitasController
+PacientesController
+WebhookWhatsAppController
+
+---
+
+## AgendaDentista.WorkerRecordatorios
+
+Proyecto Worker Service (.NET).
+
+Responsable de:
+
+* detectar citas próximas
+* enviar recordatorios
+* registrar logs
+* evitar duplicados
+
+El worker ejecutará un proceso cada **10 minutos**.
+
+---
+
+# Flujo del sistema
+
+Flujo principal:
+
+1. El dentista crea una cita en el sistema
+2. La cita se guarda en la base de datos
+3. El worker revisa citas próximas
+4. Si la cita ocurre en menos de 24 horas se envía recordatorio
+5. El paciente recibe un mensaje por WhatsApp
+6. El paciente responde confirmando o cancelando
+7. El sistema actualiza el estado de la cita
+
+Estados posibles de cita:
+
+Pendiente
+Confirmada
+Cancelada
+Atendida
+
+---
+
+# Diseño de Base de Datos
+
+Motor de base de datos:
+
+SQL Server
+
+Tablas principales:
+
+Dentistas
+Pacientes
+Citas
+Recordatorios
+MensajesWhatsApp
+LogsSistema
+
+---
+
+# Tabla Dentistas
+
+Campos:
+
+IdDentista (PK)
+Nombre
+Telefono
+Email
+FechaRegistro
+Activo
+
+---
+
+# Tabla Pacientes
+
+Campos:
+
+IdPaciente (PK)
+IdDentista (FK)
+Nombre
+Telefono
+Email
+FechaRegistro
+Activo
+
+---
+
+# Tabla Citas
+
+Campos:
+
+IdCita (PK)
+IdPaciente (FK)
+IdDentista (FK)
+FechaHora
+Tratamiento
+Estado
+Confirmado
+RecordatorioEnviado
+FechaCreacion
+FechaActualizacion
+
+---
+
+# Tabla Recordatorios
+
+Campos:
+
+IdRecordatorio (PK)
+IdCita (FK)
+FechaEnvio
+TipoRecordatorio
+EstadoEnvio
+Intentos
+RespuestaPaciente
+
+Tipos de recordatorio:
+
+24_HORAS
+3_HORAS
+
+---
+
+# Tabla MensajesWhatsApp
+
+Campos:
+
+IdMensaje (PK)
+IdDentista
+IdPaciente
+IdCita
+Telefono
+Mensaje
+TipoMensaje
+Fecha
+EstadoEnvio
+IdMensajeProveedor
+
+Tipos de mensaje:
+
+Enviado
+Recibido
+
+---
+
+# Tabla LogsSistema
+
+Campos:
+
+IdLog
+Tipo
+Mensaje
+StackTrace
+Fecha
+
+---
+
+# Query principal del Worker
+
+El worker debe buscar citas próximas:
+
+Citas cuya fecha esté dentro de las próximas 24 horas y cuyo recordatorio no haya sido enviado.
+
+---
+
+# Lógica del Worker
+
+Cada 10 minutos ejecutar:
+
+1. Buscar citas próximas
+2. Validar si el recordatorio ya fue enviado
+3. Enviar recordatorio por WhatsApp
+4. Registrar el envío en Recordatorios
+5. Guardar log en MensajesWhatsApp
+6. Marcar RecordatorioEnviado
+
+---
+
+# Integración con WhatsApp
+
+Se usará **WhatsApp Cloud API oficial**.
+
+Funciones necesarias:
+
+Enviar mensaje
+Recibir mensajes mediante webhook
+Procesar confirmaciones de pacientes
+
+Ejemplo de mensaje enviado al paciente:
+
+Hola, te recordamos tu cita dental mañana a las 10:00 AM.
+
+Responde:
+
+1 Confirmar cita
+2 Cancelar cita
+
+---
+
+# Manejo de respuestas
+
+Si el paciente responde:
+
+1
+Confirmar
+Sí
+
+Entonces:
+
+Estado de cita = Confirmada
+
+Si responde:
+
+2
+Cancelar
+
+Entonces:
+
+Estado de cita = Cancelada
+
+---
+
+# Reglas importantes
+
+* No enviar recordatorios duplicados
+* Guardar historial de mensajes
+* Manejar errores de API externa
+* Manejar reintentos en envío de recordatorios
+* Normalizar números de teléfono en formato internacional
+
+Formato recomendado:
+
++521XXXXXXXXXX
+
+---
+
+# Tecnologías a utilizar
+
+.NET 8
+ASP.NET Web API
+Entity Framework Core
+SQL Server
+WhatsApp Cloud API
+
+---
+
+# Objetivo del sistema
+
+Reducir la cantidad de citas perdidas mediante recordatorios automáticos y confirmación rápida por WhatsApp.
+
+El sistema debe ser escalable para soportar múltiples dentistas en el futuro.
