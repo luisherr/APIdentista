@@ -7,4 +7,5 @@ public interface IDentistaServicio
     Task<DentistaDto> CrearDentistaAsync(CrearDentistaDto dto);
     Task<DentistaDto?> ObtenerPorIdAsync(int idDentista);
     Task<IEnumerable<DentistaDto>> ObtenerTodosAsync();
+    Task<DentistaDto> ActualizarPerfilAsync(int idDentista, ActualizarPerfilDto dto);
 }

@@ -11,4 +11,5 @@ public interface ICitaServicio
     Task<CitaDto> ActualizarEstadoAsync(int idCita, EstadoCita nuevoEstado);
     Task<CitaDto> ConfirmarCitaAsync(int idCita);
     Task<CitaDto> CancelarCitaAsync(int idCita);
+    Task<CitaDto> EditarCitaAsync(int idCita, EditarCitaDto dto);
 }

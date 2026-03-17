@@ -41,13 +41,7 @@ public class AuthServicio : IAuthServicio
 
         await _dentistaRepositorio.AgregarAsync(dentista);
 
-        return new AuthResponseDto
-        {
-            Token = GenerarToken(dentista),
-            IdDentista = dentista.IdDentista,
-            Nombre = dentista.Nombre,
-            Email = dentista.Email
-        };
+        return CrearAuthResponse(dentista);
     }
 
     public async Task<AuthResponseDto> LoginAsync(LoginDto dto)
@@ -60,12 +54,25 @@ public class AuthServicio : IAuthServicio
         if (!dentista.Activo)
             throw new ValidacionExcepcion("La cuenta está desactivada.");
 
+        return CrearAuthResponse(dentista);
+    }
+
+    private AuthResponseDto CrearAuthResponse(Dentista dentista)
+    {
+        var diasDesdeRegistro = (DateTime.UtcNow - dentista.FechaRegistro).TotalDays;
+        var enTrial = diasDesdeRegistro <= 14;
+        var diasRestantes = enTrial ? Math.Max(0, (int)Math.Ceiling(14 - diasDesdeRegistro)) : 0;
+
         return new AuthResponseDto
         {
             Token = GenerarToken(dentista),
             IdDentista = dentista.IdDentista,
             Nombre = dentista.Nombre,
-            Email = dentista.Email
+            Email = dentista.Email,
+            SuscripcionActiva = dentista.SuscripcionActiva,
+            FechaRegistro = dentista.FechaRegistro.ToString("o"),
+            EnTrial = enTrial,
+            DiasRestantesTrial = diasRestantes
         };
     }
 

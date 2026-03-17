@@ -16,5 +16,10 @@ public class DentistaConfiguracion : IEntityTypeConfiguration<Dentista>
         builder.Property(d => d.Email).HasMaxLength(200);
         builder.Property(d => d.FechaRegistro).HasDefaultValueSql("GETDATE()");
         builder.Property(d => d.Activo).HasDefaultValue(true);
+
+        // Suscripción / Stripe
+        builder.Property(d => d.SuscripcionActiva).HasDefaultValue(false);
+        builder.Property(d => d.StripeCustomerId).HasMaxLength(100);
+        builder.Property(d => d.StripeSubscriptionId).HasMaxLength(100);
     }
 }

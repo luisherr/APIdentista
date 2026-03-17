@@ -39,6 +39,13 @@ public class PacientesController : ControllerBase
         return Ok(paciente);
     }
 
+    [HttpPut("{id}")]
+    public async Task<ActionResult<PacienteDto>> Editar(int id, [FromBody] EditarPacienteDto dto)
+    {
+        var paciente = await _pacienteServicio.EditarPacienteAsync(id, dto);
+        return Ok(paciente);
+    }
+
     [HttpDelete("{id}")]
     public async Task<ActionResult> Eliminar(int id)
     {

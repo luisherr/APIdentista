@@ -10,6 +10,12 @@ public class Dentista
     public DateTime FechaRegistro { get; set; }
     public bool Activo { get; set; }
 
+    // Suscripción / Stripe
+    public bool SuscripcionActiva { get; set; }
+    public string? StripeCustomerId { get; set; }
+    public string? StripeSubscriptionId { get; set; }
+    public DateTime? FechaFinSuscripcion { get; set; }
+
     public ICollection<Paciente> Pacientes { get; set; } = new List<Paciente>();
     public ICollection<Cita> Citas { get; set; } = new List<Cita>();
 }

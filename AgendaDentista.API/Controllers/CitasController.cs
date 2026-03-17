@@ -60,4 +60,11 @@ public class CitasController : ControllerBase
         var cita = await _citaServicio.ActualizarEstadoAsync(id, dto.NuevoEstado);
         return Ok(cita);
     }
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult<CitaDto>> Editar(int id, [FromBody] EditarCitaDto dto)
+    {
+        var cita = await _citaServicio.EditarCitaAsync(id, dto);
+        return Ok(cita);
+    }
 }

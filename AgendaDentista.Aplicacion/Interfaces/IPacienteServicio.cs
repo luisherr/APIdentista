@@ -9,4 +9,5 @@ public interface IPacienteServicio
     Task<IEnumerable<PacienteDto>> ObtenerPorDentistaAsync(int idDentista);
     Task<PacienteDto?> ObtenerPorTelefonoAsync(string telefono);
     Task EliminarPacienteAsync(int idPaciente);
+    Task<PacienteDto> EditarPacienteAsync(int idPaciente, EditarPacienteDto dto);
 }

@@ -64,4 +64,17 @@ public class PacienteServicio : IPacienteServicio
 
         await _pacienteRepositorio.EliminarAsync(paciente);
     }
+
+    public async Task<PacienteDto> EditarPacienteAsync(int idPaciente, EditarPacienteDto dto)
+    {
+        var paciente = await _pacienteRepositorio.ObtenerPorIdAsync(idPaciente)
+            ?? throw new EntidadNoEncontradaExcepcion("Paciente", idPaciente);
+
+        paciente.Nombre = dto.Nombre;
+        paciente.Telefono = NormalizadorTelefono.Normalizar(dto.Telefono);
+        paciente.Email = dto.Email;
+
+        await _pacienteRepositorio.ActualizarAsync(paciente);
+        return paciente.ToDto();
+    }
 }

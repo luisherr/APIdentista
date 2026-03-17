@@ -2,6 +2,7 @@ using AgendaDentista.Aplicacion.Configuracion;
 using AgendaDentista.Aplicacion.Interfaces;
 using AgendaDentista.Dominio.Interfaces;
 using AgendaDentista.Infraestructura.Configuracion;
+using AgendaDentista.Infraestructura.Configuraciones;
 using AgendaDentista.Infraestructura.Datos;
 using AgendaDentista.Infraestructura.Repositorios;
 using AgendaDentista.Infraestructura.Servicios;
@@ -30,6 +31,10 @@ public static class RegistroServiciosInfraestructura
         services.Configure<ChatbotConfiguracion>(configuration.GetSection("Chatbot"));
         services.AddHttpClient<IWhatsAppServicio, WhatsAppCloudApiServicio>();
         services.AddScoped<ILlmServicio, OpenAILlmServicio>();
+
+        // Stripe
+        services.Configure<StripeConfiguracion>(configuration.GetSection("Stripe"));
+        services.AddScoped<IStripeServicio, StripeServicio>();
 
         return services;
     }

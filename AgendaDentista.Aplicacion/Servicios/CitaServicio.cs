@@ -89,4 +89,20 @@ public class CitaServicio : ICitaServicio
     {
         return await ActualizarEstadoAsync(idCita, EstadoCita.Cancelada);
     }
+
+    public async Task<CitaDto> EditarCitaAsync(int idCita, EditarCitaDto dto)
+    {
+        var cita = await _citaRepositorio.ObtenerPorIdAsync(idCita)
+            ?? throw new EntidadNoEncontradaExcepcion("Cita", idCita);
+
+        if (cita.Estado == EstadoCita.Cancelada)
+            throw new ValidacionExcepcion("No se puede editar una cita cancelada.");
+
+        cita.FechaHora = dto.FechaHora;
+        cita.Tratamiento = dto.Tratamiento;
+        cita.FechaActualizacion = DateTime.UtcNow;
+
+        await _citaRepositorio.ActualizarAsync(cita);
+        return cita.ToDto();
+    }
 }

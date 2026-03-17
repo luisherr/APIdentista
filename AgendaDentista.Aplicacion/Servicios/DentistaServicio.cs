@@ -43,4 +43,24 @@ public class DentistaServicio : IDentistaServicio
         var dentistas = await _dentistaRepositorio.ObtenerTodosAsync();
         return dentistas.Select(d => d.ToDto());
     }
+
+    public async Task<DentistaDto> ActualizarPerfilAsync(int idDentista, ActualizarPerfilDto dto)
+    {
+        var dentista = await _dentistaRepositorio.ObtenerPorIdAsync(idDentista)
+            ?? throw new EntidadNoEncontradaExcepcion("Dentista", idDentista);
+
+        dentista.Nombre = dto.Nombre;
+        dentista.Telefono = NormalizadorTelefono.Normalizar(dto.Telefono);
+
+        if (!string.IsNullOrEmpty(dto.PasswordNuevo))
+        {
+            if (string.IsNullOrEmpty(dto.PasswordActual) || !BCrypt.Net.BCrypt.Verify(dto.PasswordActual, dentista.PasswordHash))
+                throw new ValidacionExcepcion("La contraseña actual es incorrecta.");
+
+            dentista.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.PasswordNuevo);
+        }
+
+        await _dentistaRepositorio.ActualizarAsync(dentista);
+        return dentista.ToDto();
+    }
 }

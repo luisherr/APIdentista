@@ -38,4 +38,11 @@ public class DentistasController : ControllerBase
         if (dentista == null) return NotFound();
         return Ok(dentista);
     }
+
+    [HttpPut("{id}/perfil")]
+    public async Task<ActionResult<DentistaDto>> ActualizarPerfil(int id, [FromBody] ActualizarPerfilDto dto)
+    {
+        var dentista = await _dentistaServicio.ActualizarPerfilAsync(id, dto);
+        return Ok(dentista);
+    }
 }
