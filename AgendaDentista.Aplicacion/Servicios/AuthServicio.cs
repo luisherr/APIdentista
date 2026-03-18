@@ -59,10 +59,6 @@ public class AuthServicio : IAuthServicio
 
     private AuthResponseDto CrearAuthResponse(Dentista dentista)
     {
-        var diasDesdeRegistro = (DateTime.UtcNow - dentista.FechaRegistro).TotalDays;
-        var enTrial = diasDesdeRegistro <= 14;
-        var diasRestantes = enTrial ? Math.Max(0, (int)Math.Ceiling(14 - diasDesdeRegistro)) : 0;
-
         return new AuthResponseDto
         {
             Token = GenerarToken(dentista),
@@ -70,9 +66,7 @@ public class AuthServicio : IAuthServicio
             Nombre = dentista.Nombre,
             Email = dentista.Email,
             SuscripcionActiva = dentista.SuscripcionActiva,
-            FechaRegistro = dentista.FechaRegistro.ToString("o"),
-            EnTrial = enTrial,
-            DiasRestantesTrial = diasRestantes
+            FechaFinSuscripcion = dentista.FechaFinSuscripcion?.ToString("o")
         };
     }
 

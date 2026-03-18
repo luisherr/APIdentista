@@ -33,16 +33,10 @@ public class SuscripcionesController : ControllerBase
         var dentista = await _dentistaRepo.ObtenerPorIdAsync(idDentista);
         if (dentista == null) return NotFound();
 
-        var diasDesdeRegistro = (DateTime.UtcNow - dentista.FechaRegistro).TotalDays;
-        var enTrial = diasDesdeRegistro <= 14;
-        var diasRestantes = enTrial ? Math.Max(0, (int)Math.Ceiling(14 - diasDesdeRegistro)) : 0;
-
         return Ok(new SuscripcionEstadoDto
         {
-            EnTrial = enTrial,
-            DiasRestantesTrial = diasRestantes,
             SuscripcionActiva = dentista.SuscripcionActiva,
-            AccesoPermitido = enTrial || dentista.SuscripcionActiva
+            FechaFinSuscripcion = dentista.FechaFinSuscripcion?.ToString("o")
         });
     }
 

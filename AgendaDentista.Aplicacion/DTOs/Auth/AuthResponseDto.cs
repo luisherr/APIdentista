@@ -7,9 +7,7 @@ public class AuthResponseDto
     public string Nombre { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
 
-    // Suscripción / Trial
+    // Suscripción
     public bool SuscripcionActiva { get; set; }
-    public string FechaRegistro { get; set; } = string.Empty;
-    public bool EnTrial { get; set; }
-    public int DiasRestantesTrial { get; set; }
+    public string? FechaFinSuscripcion { get; set; }
 }
