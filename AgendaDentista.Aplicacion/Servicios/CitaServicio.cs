@@ -26,9 +26,6 @@ public class CitaServicio : ICitaServicio
 
     public async Task<CitaDto> CrearCitaAsync(CrearCitaDto dto)
     {
-        if (dto.FechaHora <= DateTime.Now)
-            throw new ValidacionExcepcion("La fecha de la cita debe ser futura.");
-
         var paciente = await _pacienteRepositorio.ObtenerPorIdAsync(dto.IdPaciente)
             ?? throw new EntidadNoEncontradaExcepcion("Paciente", dto.IdPaciente);
 
