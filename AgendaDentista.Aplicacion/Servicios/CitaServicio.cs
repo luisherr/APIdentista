@@ -5,6 +5,7 @@ using AgendaDentista.Aplicacion.Mapeos;
 using AgendaDentista.Dominio.Entidades;
 using AgendaDentista.Dominio.Enums;
 using AgendaDentista.Dominio.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace AgendaDentista.Aplicacion.Servicios;
@@ -14,20 +15,20 @@ public class CitaServicio : ICitaServicio
     private readonly ICitaRepositorio _citaRepositorio;
     private readonly IPacienteRepositorio _pacienteRepositorio;
     private readonly IDentistaRepositorio _dentistaRepositorio;
-    private readonly IWhatsAppServicio _whatsAppServicio;
+    private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<CitaServicio> _logger;
 
     public CitaServicio(
         ICitaRepositorio citaRepositorio,
         IPacienteRepositorio pacienteRepositorio,
         IDentistaRepositorio dentistaRepositorio,
-        IWhatsAppServicio whatsAppServicio,
+        IServiceProvider serviceProvider,
         ILogger<CitaServicio> logger)
     {
         _citaRepositorio = citaRepositorio;
         _pacienteRepositorio = pacienteRepositorio;
         _dentistaRepositorio = dentistaRepositorio;
-        _whatsAppServicio = whatsAppServicio;
+        _serviceProvider = serviceProvider;
         _logger = logger;
     }
 
@@ -69,7 +70,8 @@ public class CitaServicio : ICitaServicio
                           "1 - Confirmar cita\n" +
                           "2 - Cancelar cita";
 
-            await _whatsAppServicio.EnviarMensajeAsync(paciente.Telefono, mensaje);
+            var whatsAppServicio = _serviceProvider.GetRequiredService<IWhatsAppServicio>();
+            await whatsAppServicio.EnviarMensajeAsync(paciente.Telefono, mensaje);
         }
         catch (Exception ex)
         {
