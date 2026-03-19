@@ -20,6 +20,8 @@ public class WhatsAppCloudApiServicio : IWhatsAppServicio
     private readonly IPacienteRepositorio _pacienteRepositorio;
     private readonly ILogSistemaRepositorio _logRepositorio;
     private readonly IChatbotServicio _chatbotServicio;
+    private readonly ICitaRepositorio _citaRepositorio;
+    private readonly IRecordatorioRepositorio _recordatorioRepositorio;
     private readonly ILogger<WhatsAppCloudApiServicio> _logger;
 
     public WhatsAppCloudApiServicio(
@@ -29,6 +31,8 @@ public class WhatsAppCloudApiServicio : IWhatsAppServicio
         IPacienteRepositorio pacienteRepositorio,
         ILogSistemaRepositorio logRepositorio,
         IChatbotServicio chatbotServicio,
+        ICitaRepositorio citaRepositorio,
+        IRecordatorioRepositorio recordatorioRepositorio,
         ILogger<WhatsAppCloudApiServicio> logger)
     {
         _httpClient = httpClient;
@@ -37,6 +41,8 @@ public class WhatsAppCloudApiServicio : IWhatsAppServicio
         _pacienteRepositorio = pacienteRepositorio;
         _logRepositorio = logRepositorio;
         _chatbotServicio = chatbotServicio;
+        _citaRepositorio = citaRepositorio;
+        _recordatorioRepositorio = recordatorioRepositorio;
         _logger = logger;
     }
 
@@ -143,6 +149,19 @@ public class WhatsAppCloudApiServicio : IWhatsAppServicio
                     };
                     await _mensajeRepositorio.AgregarAsync(mensajeRegistro);
 
+                    // Verificar si es respuesta a recordatorio (1 = confirmar, 2 = cancelar)
+                    var textoLimpio = msg.Text.Body.Trim();
+                    if ((textoLimpio == "1" || textoLimpio == "2") && paciente != null)
+                    {
+                        var respuestaRecordatorio = await ProcesarRespuestaRecordatorioAsync(
+                            paciente, textoLimpio, telefonoNormalizado);
+                        if (respuestaRecordatorio != null)
+                        {
+                            await EnviarMensajeAsync(telefonoNormalizado, respuestaRecordatorio);
+                            continue;
+                        }
+                    }
+
                     // Procesar con chatbot IA
                     var respuesta = await _chatbotServicio.ProcesarMensajeAsync(
                         telefonoNormalizado, msg.Text.Body, nombrePerfil);
@@ -157,6 +176,55 @@ public class WhatsAppCloudApiServicio : IWhatsAppServicio
                         $"Error procesando mensaje de {msg.From}: {ex.Message}", ex.StackTrace);
                 }
             }
+        }
+    }
+
+    private async Task<string?> ProcesarRespuestaRecordatorioAsync(
+        Paciente paciente, string respuesta, string telefono)
+    {
+        try
+        {
+            // Buscar citas pendientes o confirmadas del paciente en las próximas 48 horas
+            var ahora = DateTime.UtcNow;
+            var citas = await _citaRepositorio.ObtenerCitasPorPacienteAsync(paciente.IdPaciente);
+            var citaConRecordatorio = citas
+                .Where(c => c.RecordatorioEnviado
+                    && (c.Estado == EstadoCita.Pendiente || c.Estado == EstadoCita.Confirmada)
+                    && c.FechaHora > ahora
+                    && c.FechaHora <= ahora.AddHours(48))
+                .OrderBy(c => c.FechaHora)
+                .FirstOrDefault();
+
+            if (citaConRecordatorio == null)
+                return null; // No hay recordatorio reciente, dejar que el chatbot maneje
+
+            var fecha = citaConRecordatorio.FechaHora.ToString("dd/MM/yyyy");
+            var hora = citaConRecordatorio.FechaHora.ToString("hh:mm tt");
+
+            if (respuesta == "1")
+            {
+                citaConRecordatorio.Estado = EstadoCita.Confirmada;
+                citaConRecordatorio.Confirmado = true;
+                citaConRecordatorio.FechaActualizacion = DateTime.UtcNow;
+                await _citaRepositorio.ActualizarAsync(citaConRecordatorio);
+
+                return $"✅ ¡Perfecto {paciente.Nombre}! Tu cita del {fecha} a las {hora} ha sido confirmada. ¡Te esperamos!";
+            }
+            else if (respuesta == "2")
+            {
+                citaConRecordatorio.Estado = EstadoCita.Cancelada;
+                citaConRecordatorio.FechaActualizacion = DateTime.UtcNow;
+                await _citaRepositorio.ActualizarAsync(citaConRecordatorio);
+
+                return $"❌ Tu cita del {fecha} a las {hora} ha sido cancelada. Si deseas reprogramar, escríbenos y con gusto te ayudamos. 🦷";
+            }
+
+            return null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error procesando respuesta de recordatorio para {Telefono}", telefono);
+            return null;
         }
     }
 }
