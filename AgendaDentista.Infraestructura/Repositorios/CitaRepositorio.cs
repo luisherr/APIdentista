@@ -28,7 +28,7 @@ public class CitaRepositorio : RepositorioBase<Cita>, ICitaRepositorio
         return await _dbSet
             .Include(c => c.Paciente)
             .Include(c => c.Dentista)
-            .Where(c => c.Estado == EstadoCita.Pendiente
+            .Where(c => (c.Estado == EstadoCita.Pendiente || c.Estado == EstadoCita.Confirmada)
                 && !c.RecordatorioEnviado
                 && c.FechaHora >= ahora
                 && c.FechaHora <= limite)

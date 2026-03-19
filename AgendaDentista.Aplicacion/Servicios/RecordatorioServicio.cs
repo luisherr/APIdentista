@@ -124,8 +124,15 @@ public class RecordatorioServicio : IRecordatorioServicio
         var nombrePaciente = cita.Paciente?.Nombre ?? "Paciente";
         var nombreDentista = cita.Dentista?.Nombre ?? "su dentista";
 
-        return $"Hola {nombrePaciente}, te recordamos tu cita dental el {fecha} a las {hora} con {nombreDentista}.\n\n" +
-               $"Tratamiento: {cita.Tratamiento}\n\n" +
+        if (cita.Estado == EstadoCita.Confirmada)
+        {
+            return $"📋 Hola {nombrePaciente}, te recordamos que tienes una cita confirmada el {fecha} a las {hora} con {nombreDentista}.\n\n" +
+                   $"🦷 Tratamiento: {cita.Tratamiento}\n\n" +
+                   "Si necesitas reprogramar, escríbenos y con gusto te ayudamos. ¡Te esperamos! 😊";
+        }
+
+        return $"📋 Hola {nombrePaciente}, te recordamos tu cita dental el {fecha} a las {hora} con {nombreDentista}.\n\n" +
+               $"🦷 Tratamiento: {cita.Tratamiento}\n\n" +
                "Responde:\n" +
                "1 - Confirmar cita\n" +
                "2 - Cancelar cita";
