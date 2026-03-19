@@ -5,6 +5,7 @@ using AgendaDentista.Aplicacion.Mapeos;
 using AgendaDentista.Dominio.Entidades;
 using AgendaDentista.Dominio.Enums;
 using AgendaDentista.Dominio.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace AgendaDentista.Aplicacion.Servicios;
 
@@ -13,15 +14,21 @@ public class CitaServicio : ICitaServicio
     private readonly ICitaRepositorio _citaRepositorio;
     private readonly IPacienteRepositorio _pacienteRepositorio;
     private readonly IDentistaRepositorio _dentistaRepositorio;
+    private readonly IWhatsAppServicio _whatsAppServicio;
+    private readonly ILogger<CitaServicio> _logger;
 
     public CitaServicio(
         ICitaRepositorio citaRepositorio,
         IPacienteRepositorio pacienteRepositorio,
-        IDentistaRepositorio dentistaRepositorio)
+        IDentistaRepositorio dentistaRepositorio,
+        IWhatsAppServicio whatsAppServicio,
+        ILogger<CitaServicio> logger)
     {
         _citaRepositorio = citaRepositorio;
         _pacienteRepositorio = pacienteRepositorio;
         _dentistaRepositorio = dentistaRepositorio;
+        _whatsAppServicio = whatsAppServicio;
+        _logger = logger;
     }
 
     public async Task<CitaDto> CrearCitaAsync(CrearCitaDto dto)
@@ -47,6 +54,28 @@ public class CitaServicio : ICitaServicio
         var creada = await _citaRepositorio.AgregarAsync(cita);
         creada.Paciente = paciente;
         creada.Dentista = dentista;
+
+        // Enviar notificación por WhatsApp al paciente
+        try
+        {
+            var fecha = dto.FechaHora.ToString("dd/MM/yyyy");
+            var hora = dto.FechaHora.ToString("hh:mm tt");
+            var mensaje = $"📅 ¡Hola {paciente.Nombre}! Se ha agendado una cita para ti.\n\n" +
+                          $"🦷 Tratamiento: {dto.Tratamiento}\n" +
+                          $"📆 Fecha: {fecha}\n" +
+                          $"🕐 Hora: {hora}\n" +
+                          $"👨‍⚕️ Dentista: {dentista.Nombre}\n\n" +
+                          "Responde:\n" +
+                          "1 - Confirmar cita\n" +
+                          "2 - Cancelar cita";
+
+            await _whatsAppServicio.EnviarMensajeAsync(paciente.Telefono, mensaje);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "No se pudo enviar notificación WhatsApp para cita {IdCita}", creada.IdCita);
+        }
+
         return creada.ToDto();
     }
 

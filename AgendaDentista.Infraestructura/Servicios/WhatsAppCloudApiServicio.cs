@@ -184,14 +184,12 @@ public class WhatsAppCloudApiServicio : IWhatsAppServicio
     {
         try
         {
-            // Buscar citas pendientes o confirmadas del paciente en las próximas 48 horas
+            // Buscar citas pendientes del paciente en el futuro
             var ahora = DateTime.UtcNow;
             var citas = await _citaRepositorio.ObtenerCitasPorPacienteAsync(paciente.IdPaciente);
             var citaConRecordatorio = citas
-                .Where(c => c.RecordatorioEnviado
-                    && (c.Estado == EstadoCita.Pendiente || c.Estado == EstadoCita.Confirmada)
-                    && c.FechaHora > ahora
-                    && c.FechaHora <= ahora.AddHours(48))
+                .Where(c => (c.Estado == EstadoCita.Pendiente || c.Estado == EstadoCita.Confirmada)
+                    && c.FechaHora > ahora)
                 .OrderBy(c => c.FechaHora)
                 .FirstOrDefault();
 
