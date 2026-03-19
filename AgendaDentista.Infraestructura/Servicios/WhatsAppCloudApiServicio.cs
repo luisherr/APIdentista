@@ -46,10 +46,12 @@ public class WhatsAppCloudApiServicio : IWhatsAppServicio
         {
             var url = $"{_config.UrlBase}/{_config.NumeroTelefonoId}/messages";
 
+            var telefonoLimpio = telefono.TrimStart('+');
+
             var payload = new
             {
                 messaging_product = "whatsapp",
-                to = telefono,
+                to = telefonoLimpio,
                 type = "text",
                 text = new { body = mensaje }
             };
