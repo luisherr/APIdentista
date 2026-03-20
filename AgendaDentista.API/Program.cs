@@ -2,6 +2,8 @@ using System.Text;
 using AgendaDentista.Aplicacion.Extensiones;
 using AgendaDentista.Infraestructura.Extensiones;
 using AgendaDentista.API.Middleware;
+using AgendaDentista.API.Configuracion;
+using AgendaDentista.API.BackgroundServices;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -16,6 +18,9 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AgregarAplicacion();
 builder.Services.AgregarInfraestructura(builder.Configuration);
+
+builder.Services.Configure<WorkerConfiguracion>(builder.Configuration.GetSection("Worker"));
+builder.Services.AddHostedService<RecordatoriosWorker>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
