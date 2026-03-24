@@ -10,11 +10,11 @@ public class DentistaConfiguracion : IEntityTypeConfiguration<Dentista>
     {
         builder.ToTable("Dentistas");
         builder.HasKey(d => d.IdDentista);
-        builder.Property(d => d.IdDentista).UseIdentityColumn();
+        builder.Property(d => d.IdDentista).ValueGeneratedOnAdd();
         builder.Property(d => d.Nombre).IsRequired().HasMaxLength(200);
         builder.Property(d => d.Telefono).IsRequired().HasMaxLength(20);
         builder.Property(d => d.Email).HasMaxLength(200);
-        builder.Property(d => d.FechaRegistro).HasDefaultValueSql("GETDATE()");
+        builder.Property(d => d.FechaRegistro).HasDefaultValueSql("CURRENT_TIMESTAMP");
         builder.Property(d => d.Activo).HasDefaultValue(true);
 
         // Suscripción / Stripe

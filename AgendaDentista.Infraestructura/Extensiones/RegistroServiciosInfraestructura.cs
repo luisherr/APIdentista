@@ -17,7 +17,7 @@ public static class RegistroServiciosInfraestructura
     public static IServiceCollection AgregarInfraestructura(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<AgendaDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
 
         services.AddScoped<IDentistaRepositorio, DentistaRepositorio>();
         services.AddScoped<IPacienteRepositorio, PacienteRepositorio>();

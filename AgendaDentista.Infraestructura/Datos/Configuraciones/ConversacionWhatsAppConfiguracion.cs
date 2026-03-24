@@ -10,10 +10,10 @@ public class ConversacionWhatsAppConfiguracion : IEntityTypeConfiguration<Conver
     {
         builder.ToTable("ConversacionesWhatsApp");
         builder.HasKey(c => c.IdConversacion);
-        builder.Property(c => c.IdConversacion).UseIdentityColumn();
+        builder.Property(c => c.IdConversacion).ValueGeneratedOnAdd();
         builder.Property(c => c.Telefono).IsRequired().HasMaxLength(20);
         builder.Property(c => c.HistorialMensajesJson).IsRequired();
-        builder.Property(c => c.UltimaActividad).HasDefaultValueSql("GETDATE()");
+        builder.Property(c => c.UltimaActividad).HasDefaultValueSql("CURRENT_TIMESTAMP");
         builder.Property(c => c.Activa).HasDefaultValue(true);
 
         builder.HasIndex(c => new { c.Telefono, c.Activa });

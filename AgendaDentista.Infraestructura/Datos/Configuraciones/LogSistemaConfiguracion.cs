@@ -10,9 +10,9 @@ public class LogSistemaConfiguracion : IEntityTypeConfiguration<LogSistema>
     {
         builder.ToTable("LogsSistema");
         builder.HasKey(l => l.IdLog);
-        builder.Property(l => l.IdLog).UseIdentityColumn();
+        builder.Property(l => l.IdLog).ValueGeneratedOnAdd();
         builder.Property(l => l.Tipo).HasConversion<int>();
         builder.Property(l => l.Mensaje).IsRequired();
-        builder.Property(l => l.Fecha).HasDefaultValueSql("GETDATE()");
+        builder.Property(l => l.Fecha).HasDefaultValueSql("CURRENT_TIMESTAMP");
     }
 }

@@ -10,10 +10,10 @@ public class CitaConfiguracion : IEntityTypeConfiguration<Cita>
     {
         builder.ToTable("Citas");
         builder.HasKey(c => c.IdCita);
-        builder.Property(c => c.IdCita).UseIdentityColumn();
+        builder.Property(c => c.IdCita).ValueGeneratedOnAdd();
         builder.Property(c => c.Tratamiento).IsRequired().HasMaxLength(500);
         builder.Property(c => c.Estado).HasConversion<int>();
-        builder.Property(c => c.FechaCreacion).HasDefaultValueSql("GETDATE()");
+        builder.Property(c => c.FechaCreacion).HasDefaultValueSql("CURRENT_TIMESTAMP");
 
         builder.HasIndex(c => new { c.IdDentista, c.FechaHora });
 

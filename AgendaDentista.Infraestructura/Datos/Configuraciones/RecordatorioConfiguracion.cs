@@ -10,7 +10,7 @@ public class RecordatorioConfiguracion : IEntityTypeConfiguration<Recordatorio>
     {
         builder.ToTable("Recordatorios");
         builder.HasKey(r => r.IdRecordatorio);
-        builder.Property(r => r.IdRecordatorio).UseIdentityColumn();
+        builder.Property(r => r.IdRecordatorio).ValueGeneratedOnAdd();
         builder.Property(r => r.TipoRecordatorio).HasConversion<int>();
         builder.Property(r => r.EstadoEnvio).HasConversion<int>();
         builder.Property(r => r.Intentos).HasDefaultValue(0);
